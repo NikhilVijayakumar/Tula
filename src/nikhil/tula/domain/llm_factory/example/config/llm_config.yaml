@@ -1,0 +1,39 @@
+llm:
+  creative:
+    default: phi
+    models:
+      phi:
+        base_url: "http://localhost:1234/v1"
+        model: "lm_studio/phi-4-reasoning"
+        api_key: "your_api_key"
+      llama:
+        base_url: "http://localhost:1234/v1"
+        model: "lm_studio/meta-llama-3.1-8b-instruct"
+        api_key: ""
+  evaluation:
+    default: gemma
+    models:
+      gemma:
+        base_url: "http://localhost:1234/v1"
+        model: "lm_studio/gemma-3-12b-it"
+        api_key: ""
+      qwen:
+        base_url: "http://localhost:1234/v1"
+        model: "lm_studio/qwen3-14b"
+        api_key: "xxxx"
+
+
+llm_parameters:
+  creative:
+    temperature: 0.8
+    top_p: 0.9
+    max_completion_tokens: 8192
+    presence_penalty: 0.6
+    frequency_penalty: 0.4
+    stop: ["###"]
+  evaluation:
+    temperature: 0.0
+    top_p: 0.5
+    presence_penalty: 0.0
+    frequency_penalty: 0.0
+    stop: ["###"]

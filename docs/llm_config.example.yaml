@@ -1,0 +1,97 @@
+# LLM Configuration Example for Tula Code Audit
+
+# Copy this file to config/llm/llm_config.yaml and customize
+# The config/llm/ directory is gitignored to keep API keys secret
+
+llm:
+  # Evaluation LLM (for code review - lower temperature, more focused)
+  evaluation:
+    default: gemini  # or openai, claude, local, ollama
+    models:
+      # Google Gemini (recommended for code review)
+      gemini:
+        model: "gemini/gemini-1.5-flash"  # or gemini-pro, gemini-1.5-pro
+        api_key: ${GEMINI_API_KEY}  # Set in environment or replace with actual key
+        
+      # OpenAI GPT-4
+      openai:
+        model: "gpt-4"  # or gpt-4-turbo, gpt-3.5-turbo
+        api_key: ${OPENAI_API_KEY}
+      
+      # Anthropic Claude
+      claude:
+        model: "claude-3-opus-20240229"  # or claude-3-sonnet, claude-3-haiku
+        api_key: ${ANTHROPIC_API_KEY}
+      
+      # LM Studio (local models) - NO API KEY NEEDED
+      local:
+        model: "openai/local-model"  # LiteLLM uses openai format for compatibility
+        base_url: "http://localhost:1234/v1"  # LM Studio default port
+        api_key: "not-needed"  # LM Studio doesn't require API key
+      
+      # Ollama (local models) - NO API KEY NEEDED
+      ollama:
+        model: "ollama/llama2"  # or ollama/codellama, ollama/mistral
+        # Ollama runs on localhost:11434 by default (auto-detected by LiteLLM)
+  
+  # Creative LLM (for generating examples, docs - higher temperature)
+  creative:
+    default: gemini
+    models:
+      gemini:
+        model: "gemini/gemini-1.5-flash"
+        api_key: ${GEMINI_API_KEY}
+      
+      openai:
+        model: "gpt-4"
+        api_key: ${OPENAI_API_KEY}
+
+# LLM Parameters
+llm_parameters:
+  # Evaluation parameters (strict, focused)
+  evaluation:
+    temperature: 0.0          # Deterministic output
+    top_p: 1.0
+    max_completion_tokens: 4096
+    presence_penalty: 0.0
+    frequency_penalty: 0.0
+  
+  # Creative parameters (more varied output)
+  creative:
+    temperature: 0.7          # More creative
+    top_p: 0.9
+    max_completion_tokens: 4096
+    presence_penalty: 0.0
+    frequency_penalty: 0.0
+
+# ========================================
+# LiteLLM Provider Guide
+# ========================================
+#
+# LiteLLM supports 100+ providers with a unified interface.
+# Just change the model name - no code changes needed!
+#
+# Format: "provider/model-name"
+#
+# Examples:
+#   OpenAI:      "gpt-4", "gpt-3.5-turbo", "openai/gpt-4"
+#   Google:      "gemini/gemini-pro", "gemini/gemini-1.5-flash"
+#   Anthropic:   "claude-3-opus", "claude-3-sonnet"
+#   Azure:       "azure/gpt-4"
+#   Cohere:      "cohere/command-r-plus"
+#   Mistral:     "mistral/mistral-large"
+#   LM Studio:   "openai/local-model" + base_url
+#   Ollama:      "ollama/llama2", "ollama/codellama"
+#   Hugging Face:"huggingface/meta-llama/Llama-2-7b"
+#
+# Full list: https://docs.litellm.ai/docs/providers
+#
+# For local models (LM Studio, Ollama):
+# - No API key needed
+# - Use base_url for custom endpoints
+# - Format as "openai/model-name" for OpenAI-compatible APIs
+#
+# Environment Variables:
+# - Use ${VAR_NAME} to reference environment variables
+# - Keeps secrets out of version control
+# - Example: api_key: ${OPENAI_API_KEY}

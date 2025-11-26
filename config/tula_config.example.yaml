@@ -1,0 +1,106 @@
+# Tula Configuration File
+# This is the main configuration file for Tula code audit
+
+# Output directories
+output:
+  # Base output directory (relative to project root or absolute path)
+  base_dir: ".tula/output"
+  
+  # Intermediate results (for debugging and tracking)
+  # Set to null or comment out to disable intermediate outputs
+  intermediate_dir: "intermediate"  # Will be: .tula/output/intermediate/
+  
+  # Final results directory
+  final_dir: "final"  # Will be: .tula/output/final/
+
+# LLM Configuration
+# You can specify different models for different tasks
+llm:
+  # Code review (strict, focused)
+  evaluation:
+    default: gemini
+    models:
+      gemini:
+        model: "gemini/gemini-1.5-flash"
+        api_key: ${GEMINI_API_KEY}
+  
+  # Report formatting (creative, better for markdown)
+  creative:
+    default: gemini
+    models:
+      gemini:
+        model: "gemini/gemini-1.5-flash"
+        api_key: ${GEMINI_API_KEY}
+  
+  llm_parameters:
+    evaluation:
+      temperature: 0.0
+      top_p: 1.0
+      max_completion_tokens: 4096
+    
+    creative:
+      temperature: 0.3  # Slightly creative for better formatting
+      top_p: 0.9
+      max_completion_tokens: 4096
+
+# Option 2: Reference external LLM config file (uncomment to use)
+# llm_config_path: "config/llm/llm_config.yaml"
+
+# Prompt Configuration (Optional)
+# Option 1: Reference external prompt files
+prompts:
+  system_prompt_path: "config/prompts/system_prompt.yaml"  # Optional
+  user_prompts_path: "config/prompts/user_prompts.yaml"    # Optional
+
+# Option 2: Inline prompts (uncomment to use instead of files)
+# prompts:
+#   system:
+#     role: "Senior Technical Architect"
+#     goal: "Review code for architectural compliance"
+#     backstory: "You are an experienced architect..."
+#   user:
+#     single_review: "Review this diff: ..."
+
+# Code Audit Settings
+audit:
+  # Rules file (architectural guidelines)
+  rules_file: "AGENTS.md"  # Optional, can also be ARCHITECTURE.md, RULES.md
+  
+  # Dependencies file (framework guidelines)
+  dependencies_file: "DEPENDENCIES.md"  # Optional
+  
+  # Maximum tokens per chunk for large diffs
+  max_tokens_per_chunk: 14000
+  
+  # Skip audit flag (can also use SKIP_AI_AUDIT env var)
+  skip_audit: false
+
+# File Discovery (where to look for config files if paths are relative)
+discovery:
+  search_paths:
+    - "."              # Current directory
+    - "config/"        # config subdirectory
+    - "../"            # Parent directory
+    - "~/.tula/"       # User home directory
+
+# Logging and Debugging
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR
+  level: "INFO"
+  
+  # Save detailed logs to file
+  log_file: ".tula/output/audit.log"  # Optional
+  
+  # Verbose output
+  verbose: false
+
+# Advanced Options
+advanced:
+  # Save raw LLM responses (for debugging)
+  save_llm_responses: true
+  
+  # Save chunk breakdowns (for large diffs)
+  save_chunk_info: true
+  
+  # Timestamp format for output files
+  timestamp_format: "%Y%m%d_%H%M%S"  # e.g., 20250126_123045

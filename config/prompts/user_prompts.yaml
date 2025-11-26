@@ -1,0 +1,52 @@
+# User Prompt Templates for Code Audit
+
+# Single file/diff review
+single_review: |
+  Review this git diff for architectural compliance:
+  
+  ```diff
+  {diff}
+  ```
+  
+  Provide your review in JSON format.
+
+# Chunked review for large diffs
+chunked_review: |
+  Review chunk {chunk_num} of {total_chunks} ({file_count} files):
+  Files in this chunk: {filenames}
+  
+  ```diff
+  {diff}
+  ```
+  
+  Provide your review in JSON format.
+
+# Individual file review for full repository audits
+file_review: |
+  Review Python file for architectural compliance:
+  
+  **File:** `{filepath}`
+  
+  ```python
+  {content}
+  ```
+  
+  Focus on:
+  1. Architecture violations
+  2. Missing type hints
+  3. Generic exceptions
+  4. Framework coupling
+  5. Dependency injection issues
+  
+  Provide your review in JSON format.
+
+# Chunk review with filenames
+chunk_with_files: |
+  Review chunk {chunk_index} ({file_count} files):
+  Files: {file_list}
+  
+  ```diff
+  {chunk_diff}
+  ```
+  
+  JSON review:

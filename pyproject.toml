@@ -1,0 +1,27 @@
+[project]
+name = "Tula"
+version = "1.0.0"
+description = "AI-powered code audit tool for architectural compliance"
+dependencies = [
+    "PyYAML==6.0.2",
+    "chardet>=5.0.0",
+    "pydantic>=2.0.0",
+    "litellm>=1.0.0",
+    "pre-commit >= 3.6.0",
+    "mypy >= 1.8.0",
+    "black >= 24.2.0",
+    "flake8 >= 7.0.0",
+    "isort >= 5.13.2",
+    "pytest >= 7.4.0",
+]
+
+[project.scripts]
+tula-audit = "nikhil.tula.domain.code_audit.cli:main"
+
+
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
