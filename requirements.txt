@@ -8,5 +8,8 @@ black == 24.2.0
 flake8 == 7.0.0
 isort == 5.13.2
 pytest == 7.4.0
+git+https://github.com/NikhilVijayakumar/Vak.git@main#egg=Vak
+
+
 
 

@@ -35,7 +35,7 @@ CrewAI telemetry disabled successfully.
 ### 2. LLM Integration ✅ SUCCESS
 
 The script correctly used:
-- ✅ Amsha's `llm_factory` module
+- ✅ Vak's `llm_factory` module
 - ✅ `LLMSettings` to parse YAML config
 - ✅ `LLMBuilder.build_evaluation()` for strict review mode
 - ✅ Proper LLM parameters (temperature=0.3 for consistent reviews)

@@ -16,7 +16,7 @@ An AI-powered architectural review system that integrates seamlessly into your d
 
 - Python 3.8+
 - Git
-- Optional: Amsha toolkit (for LLM-powered features)
+- Vak library (for LLM-powered features)
 
 ## 🚀 Installation
 
@@ -73,11 +73,14 @@ llm:
 3. **Run the audit**:
 
 ```bash
-# Stage your changes
-git add .
+# Option 1: Use as library (recommended)
+python3 examples/basic_usage.py
 
-# Run audit
+# Option 2: Use CLI command
 tula-audit
+
+# Option 3: Use programmatically in your code
+python3 -c "from nikhil.tula import TulaAuditor; auditor = TulaAuditor(); result = auditor.audit_git_diff(); print('✅' if result.approved else '❌')"
 ```
 
 ### Configuration Discovery
@@ -99,7 +102,25 @@ Tula searches for configuration files in the following order:
 
 ## 📖 Usage
 
-### Basic Usage
+### As a Library (Recommended)
+
+```python
+# your_script.py
+from nikhil.tula import TulaAuditor
+
+# Simple usage with auto-discovery
+auditor = TulaAuditor()
+result = auditor.audit_git_diff()
+
+if not result.approved:
+    for issue in result.issues:
+        print(f"❌ {issue}")
+    exit(1)
+
+print("✅ All checks passed!")
+```
+
+### Via CLI
 
 ```bash
 # Review staged changes
@@ -113,6 +134,13 @@ tula-audit --full-repo --output report.json
 
 # Skip audit for a single commit
 SKIP_AI_AUDIT=1 git commit -m "message"
+```
+
+### Basic Usage Example
+
+```bash
+# Run the included example
+python3 examples/basic_usage.py
 ```
 
 ### CLI Options
@@ -188,13 +216,13 @@ Tula/
 
 ## 🔌 LLM Integration
 
-Tula integrates with the Amsha toolkit for LLM-powered features. If you want to use AI-powered reviews:
+Tula integrates with the Vak library for LLM-powered features. The Vak library provides a clean llm_factory implementation that supports both local and cloud LLMs.
 
-1. Install the Amsha toolkit separately
-2. Configure your LLM in `llm_config.yaml`
-3. Set your API keys as environment variables
+1. Install the Vak library (automatically installed as a dependency)
+2. Configure your LLM in `config/llm_config.yaml`
+3. Set your API keys as environment variables or in the config file
 
-Without the Amsha toolkit, Tula will fall back to pattern-matching based reviews.
+Without the Vak library, Tula will fall back to pattern-matching based reviews.
 
 ## 🛠️ Development
 
@@ -286,8 +314,8 @@ Contributions are welcome! Please ensure:
 
 ## 🙏 Acknowledgments
 
-- Built on top of the Amsha toolkit architecture
-- Uses LLM technology for intelligent code review
+- Uses Vak library for LLM factory implementation
+- Powered by LLM technology for intelligent code review
 
 ## 📞 Support
 

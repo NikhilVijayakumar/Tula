@@ -14,8 +14,8 @@ if str(Path(__file__).parent.parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from nikhil.tula.utils.yaml_utils import YamlUtils
-from nikhil.tula.domain.llm_factory.settings.llm_settings import LLMSettings
-from nikhil.tula.domain.llm_factory.service.llm_builder import LLMBuilder
+from nikhil.vak.domain.llm_factory.settings.llm_settings import LLMSettings
+from nikhil.vak.domain.llm_factory.service.llm_builder import LLMBuilder
 from nikhil.tula.domain.code_audit.config import AuditConfig
 from nikhil.tula.domain.code_audit.prompt_loader import PromptLoader
 
@@ -32,7 +32,7 @@ class AuditResult:
 
 
 class AIAuditor:
-    """AI-powered code auditor using llm_factory"""
+    """AI-powered code auditor using Vak's llm_factory"""
     
     def __init__(self, config: AuditConfig):
         self.config = config
@@ -136,7 +136,7 @@ class AIAuditor:
         return groups
     
     def _load_llm(self) -> bool:
-        """Load LLM using llm_factory"""
+        """Load LLM using Vak's llm_factory"""
         if not self.config.llm_config_path or not self.config.llm_config_path.exists():
             return False
         

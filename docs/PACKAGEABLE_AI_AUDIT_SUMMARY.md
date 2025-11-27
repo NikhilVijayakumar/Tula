@@ -8,16 +8,16 @@
 ## What Was Built
 
 A complete **reusable AI audit system** that clients can use by simply:
-1. Installing Amsha: `pip install amsha[audit]`
+1. Installing Tula: `pip install tula`
 2. Providing their rules file (AGENTS.md)
-3. Running: `amsha-audit`
+3. Running: `tula-audit`
 
 ---
 
 ## Package Structure
 
 ```
-src/nikhil/amsha/toolkit/code_audit/
+src/nikhil/tula/domain/code_audit/
 ├── __init__.py           # Package exports
 ├── ai_auditor.py         # Core AIAuditor class
 ├── cli.py                # Command-line interface
@@ -33,7 +33,7 @@ src/nikhil/amsha/toolkit/code_audit/
 ### 1. AIAuditor Class (`ai_auditor.py`)
 **Responsibilities:**
 - Get git diff
-- Load LLM via llm_factory
+- Load LLM via Vak's llm_factory
 - Perform chunked review (14k tokens per chunk)
 - Pattern matching fallback
 - Return structured results
@@ -191,9 +191,9 @@ Full LLM Review → Chunked Review → Pattern Matching → Skip
 ```
 
 ### 4. Reusable Infrastructure
-Uses existing Amsha components:
+Uses Vak library components:
 - `llm_factory` for LLM management
-- `YamlUtils` for config loading
+- `YamlUtils` for config loading (from Tula)
 - Same `llm_config.yaml` format
 
 ---

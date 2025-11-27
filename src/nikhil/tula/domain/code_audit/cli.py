@@ -1,13 +1,14 @@
 """
 Command-line interface for Tula AI Code Audit
+
+This is a thin adapter layer that maps CLI arguments to TulaAuditor API.
 """
 
 import argparse
 import sys
 from pathlib import Path
 
-from nikhil.tula.domain.code_audit.config import AuditConfig, resolve_config
-from nikhil.tula.domain.code_audit.ai_auditor import AIAuditor
+from nikhil.tula import TulaAuditor, AuditResult
 
 
 class Colors:
@@ -45,50 +46,43 @@ def create_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Use auto-discovered configs
+  # Auto-discover tula_config.yaml
   tula-audit
 
-  # Specify custom rules file
-  tula-audit --rules MY_RULES.md
+  # Specify config file explicitly
+  tula-audit --config my_config.yaml
 
-  # Specify all configs
-  tula-audit --rules AGENTS.md --config llm_config.yaml --dependencies DEPS.md
+  # Full repository audit
+  tula-audit --full-repo --output audit_report.json
 
   # Skip audit
   tula-audit --skip
 
+Config File (tula_config.yaml):
+  Put all configuration in this file:
+  - rules_file: path to AGENTS.md
+  - llm_config_path: path to llm_config.yaml
+  - output directories  
+  - audit settings
+  
+  See config/tula_config.example.yaml for template.
+
 Environment Variables:
-  TULA_RULES_FILE        - Path to rules file (e.g., AGENTS.md)
-  TULA_LLM_CONFIG        - Path to LLM config YAML
-  TULA_DEPENDENCIES_FILE - Path to dependencies file
-  SKIP_AI_AUDIT          - Set to '1' to skip audit
+  SKIP_AI_AUDIT - Set to '1' to skip audit
 
 Config File Discovery:
   Searches in order:
-  1. Current directory
+  1. Current directory (tula_config.yaml)
   2. config/ subdirectory
   3. Parent directories (up to 3 levels)
   4. ~/.tula/ directory
-  5. Package defaults
         """
-    )
-    
-    parser.add_argument(
-        '--rules',
-        type=str,
-        help='Path to rules file (e.g., AGENTS.md, ARCHITECTURE.md)'
     )
     
     parser.add_argument(
         '--config',
         type=str,
-        help='Path to LLM configuration file (llm_config.yaml)'
-    )
-    
-    parser.add_argument(
-        '--dependencies',
-        type=str,
-        help='Path to dependencies file (DEPENDENCIES.md)'
+        help='Path to tula_config.yaml (auto-discovered if not specified)'
     )
     
     parser.add_argument(
@@ -107,13 +101,6 @@ Config File Discovery:
         '--output', '-o',
         type=str,
         help='Output file for full repository audit report (JSON)'
-    )
-    
-    parser.add_argument(
-        '--max-tokens',
-        type=int,
-        default=14000,
-        help='Maximum tokens per chunk (default: 14000)'
     )
     
     parser.add_argument(
@@ -138,61 +125,36 @@ def main():
     
     print_header()
     
-    # Build configuration from CLI args
-    config = AuditConfig.from_cli_args(args)
-    
-    # Merge with environment
-    env_config = AuditConfig.from_environment()
-    if env_config.rules_file and not config.rules_file:
-        config.rules_file = env_config.rules_file
-    if env_config.llm_config_path and not config.llm_config_path:
-        config.llm_config_path = env_config.llm_config_path
-    if env_config.skip_audit:
-        config.skip_audit = True
-    
-    # Resolve configuration (find files)
-    config = resolve_config(config)
-    
-    # Validate configuration
-    if not config.skip_audit and not config.rules_file:
-        print_warning("No rules file found!")
-        print("Searched for: AGENTS.md, ARCHITECTURE.md, RULES.md")
-        print("\nOptions:")
-        print("  1. Create AGENTS.md in current directory")
-        print("  2. Use --rules to specify file")
-        print("  3. Set AMSHA_RULES_FILE environment variable")
-        print("\nProceeding with basic pattern matching only...")
+    # Create TulaAuditor from CLI args using factory method
+    auditor = TulaAuditor.from_cli_args(args)
     
     if args.verbose:
         print(f"\nConfiguration:")
-        print(f"  Rules file: {config.rules_file or 'Not found'}")
-        print(f"  LLM config: {config.llm_config_path or 'Not found'}")
-        print(f"  Dependencies: {config.dependencies_file or 'Not found'}")
-        print(f"  Max tokens: {config.max_tokens_per_chunk}")
+        print(f"  Model: {auditor.model_name or 'Pattern matching only'}")
+        print(f"  Output: {auditor.output_directory}")
         print()
     
-    # Run audit
-    auditor = AIAuditor(config)
-    
-    # Check if full repository audit requested
+    # Run appropriate audit
     if args.full_repo:
+        # Full repository audit
         output_path = Path(args.output) if args.output else None
-        report = auditor.audit_repository(output_path)
+        report = auditor.audit_repository(output_file=output_path)
         
         if report.get('error'):
             print_error(f"Audit failed: {report['error']}")
             return 1
         
-        # Exit based on issues found
-        if report['summary']['total_issues'] > 0:
-            print_error(f"\\n🚫 Found {report['summary']['total_issues']} architectural violations")
+        # Display results
+        total_issues = report['summary']['total_issues']
+        if total_issues > 0:
+            print_error(f"\n🚫 Found {total_issues} architectural violations")
             return 1
         else:
-            print_success(f"\\n✨ Repository is compliant! No issues found.")
+            print_success(f"\n✨ Repository is compliant! No issues found.")
             return 0
     
-    # Regular git diff audit
-    result = auditor.audit()
+    # Git diff audit (default)
+    result = auditor.audit_git_diff()
     
     # Display results
     if result.skipped:

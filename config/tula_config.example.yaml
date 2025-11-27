@@ -14,37 +14,15 @@ output:
   final_dir: "final"  # Will be: .tula/output/final/
 
 # LLM Configuration
-# You can specify different models for different tasks
-llm:
-  # Code review (strict, focused)
-  evaluation:
-    default: gemini
-    models:
-      gemini:
-        model: "gemini/gemini-1.5-flash"
-        api_key: ${GEMINI_API_KEY}
-  
-  # Report formatting (creative, better for markdown)
-  creative:
-    default: gemini
-    models:
-      gemini:
-        model: "gemini/gemini-1.5-flash"
-        api_key: ${GEMINI_API_KEY}
-  
-  llm_parameters:
-    evaluation:
-      temperature: 0.0
-      top_p: 1.0
-      max_completion_tokens: 4096
-    
-    creative:
-      temperature: 0.3  # Slightly creative for better formatting
-      top_p: 0.9
-      max_completion_tokens: 4096
+# Reference external LLM config file (required by Vak)
+# This should point to your llm_config.yaml that defines models and parameters
+llm_config_path: "config/llm_config.yaml"
 
-# Option 2: Reference external LLM config file (uncomment to use)
-# llm_config_path: "config/llm/llm_config.yaml"
+# Note: llm_config.yaml should follow Vak's format with:
+# - llm.creative.default and llm.creative.models
+# - llm.evaluation.default and llm.evaluation.models
+# - llm_parameters for temperature, tokens, etc.
+# See config/llm_config.yaml for the complete structure
 
 # Prompt Configuration (Optional)
 # Option 1: Reference external prompt files
@@ -75,23 +53,16 @@ audit:
   # Skip audit flag (can also use SKIP_AI_AUDIT env var)
   skip_audit: false
 
-# File Discovery (where to look for config files if paths are relative)
-discovery:
-  search_paths:
-    - "."              # Current directory
-    - "config/"        # config subdirectory
-    - "../"            # Parent directory
-    - "~/.tula/"       # User home directory
+# File Discovery Information (Reference Only)
+# Tula searches for this file in:
+# 1. Current directory
+# 2. config/ subdirectory
+# 3. Parent directories (up to 3 levels)
+# 4. ~/.tula/ directory
 
 # Logging and Debugging
 logging:
-  # Log level: DEBUG, INFO, WARNING, ERROR
-  level: "INFO"
-  
-  # Save detailed logs to file
-  log_file: ".tula/output/audit.log"  # Optional
-  
-  # Verbose output
+  # Enable verbose output
   verbose: false
 
 # Advanced Options
@@ -101,6 +72,3 @@ advanced:
   
   # Save chunk breakdowns (for large diffs)
   save_chunk_info: true
-  
-  # Timestamp format for output files
-  timestamp_format: "%Y%m%d_%H%M%S"  # e.g., 20250126_123045

@@ -22,8 +22,8 @@ from nikhil.tula.domain.code_audit.config import AuditConfig, resolve_config
 from nikhil.tula.domain.code_audit.ai_auditor import AIAuditor, AuditResult
 from nikhil.tula.domain.code_audit.report_manager import ReportManager, AuditReport
 from nikhil.tula.domain.code_audit.markdown_formatter import MarkdownFormatter
-from nikhil.tula.domain.llm_factory.service.llm_builder import LLMBuilder
-from nikhil.tula.domain.llm_factory.settings.llm_settings import LLMSettings
+from nikhil.vak.domain.llm_factory.service.llm_builder import LLMBuilder
+from nikhil.vak.domain.llm_factory.settings.llm_settings import LLMSettings
 
 
 class TulaAuditor:
@@ -49,46 +49,78 @@ class TulaAuditor:
         
         # Check results
         if result.approved:
-            print("✅ Audit passed")
+            print(f"✅ Audit passed - ready to commit!")
         else:
             for issue in result.issues:
                 print(f"❌ {issue}")
     """
     
-    def __init__(self, 
-                 config_path: Optional[str | Path] = None,
-                 rules_file: Optional[str | Path] = None,
-                 llm_config_path: Optional[str | Path] = None,
-                 output_dir: Optional[str | Path] = None,
-                 save_intermediate: bool = True):
+    @classmethod
+    def from_cli_args(cls, args):
+        """
+        Create TulaAuditor from CLI arguments
+        
+        Convenience factory method for CLI adapter.
+        Maps --config argument to TulaAuditor(config_path).
+        
+        Args:
+            args: argparse.Namespace with CLI arguments
+            
+        Returns:
+            TulaAuditor instance configured from config file
+        
+        Example:
+            parser = argparse.ArgumentParser()
+            parser.add_argument('--config', type=str)
+            args = parser.parse_args()
+            
+            auditor = TulaAuditor.from_cli_args(args)
+        """
+        config_path = getattr(args, 'config', None)
+        return cls(config_path)
+    
+    def __init__(self, config_path: Optional[str | Path] = None):
         """
         Initialize Tula Auditor
         
+        **Simplified Config-Driven Approach:**
+        - If config_path provided: Load from that file
+        - If not provided: Auto-discover tula_config.yaml
+        - If no config found: Use sensible defaults
+        
+        All configuration (rules, LLM, output, etc.) comes from the config file.
+        No need for individual parameter overrides - keep it in config.
+        
         Args:
-            config_path: Path to tula_config.yaml (auto-detected if not provided)
-            rules_file: Path to rules file (overrides config)
-            llm_config_path: Path to LLM config (overrides config)
-            output_dir: Output directory (overrides config)
-            save_intermediate: Save intermediate analysis results
+            config_path: Optional path to tula_config.yaml
+                        If None, auto-discovers in current/parent/config directories
+        
+        Examples:
+            # Auto-discover config
+            auditor = TulaAuditor()
+            
+            # Explicit config
+            auditor = TulaAuditor("path/to/tula_config.yaml")
         """
-        # Load configuration
-        if config_path and Path(config_path).exists():
-            self.config = AuditConfig.from_tula_config(Path(config_path))
+        # Load configuration from file (or use defaults)
+        if config_path:
+            config_file = Path(config_path)
+            if config_file.exists():
+                self.config = AuditConfig.from_tula_config(config_file)
+            else:
+                raise FileNotFoundError(f"Config file not found: {config_path}")
         else:
-            self.config = AuditConfig()
+            # Auto-discover tula_config.yaml
+            from nikhil.tula.domain.code_audit.config import find_tula_config
+            tula_config_path = find_tula_config()
+            
+            if tula_config_path:
+                self.config = AuditConfig.from_tula_config(tula_config_path)
+            else:
+                # No config found - use defaults with auto-discovery
+                self.config = AuditConfig()
         
-        # Override with provided values
-        if rules_file:
-            self.config.rules_file = Path(rules_file)
-        if llm_config_path:
-            self.config.llm_config_path = Path(llm_config_path)
-        if output_dir:
-            self.config.output.base_dir = Path(output_dir)
-        
-        self.config.save_llm_responses = save_intermediate
-        self.config.save_chunk_info = save_intermediate
-        
-        # Resolve configuration (find files)
+        # Resolve configuration (auto-discover rules, llm_config if not in tula_config)
         self.config = resolve_config(self.config)
         
         # Ensure output directories exist

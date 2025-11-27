@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-AI-Powered Architectural Audit Script - Using llm_factory
+AI-Powered Architectural Audit Script - Using Vak's llm_factory
 
 This script reviews git diff against AGENTS.md architectural guidelines.
-Uses Amsha's existing llm_factory infrastructure and llm_config.yaml.
+Uses Vak's llm_factory infrastructure and llm_config.yaml.
 
 Usage:
     python scripts/ai_audit.py                    # Check staged changes
@@ -23,14 +23,14 @@ from pathlib import Path
 from typing import Optional, Dict, Any
 import json
 
-# Add src to path to import Amsha modules
+# Add src to path to import Tula modules
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 try:
     from nikhil.tula.utils.yaml_utils import YamlUtils
-    from nikhil.tula.domain.llm_factory.settings.llm_settings import LLMSettings
-    from nikhil.tula.domain.llm_factory.service.llm_builder import LLMBuilder
-    from nikhil.tula.domain.llm_factory.domain.llm_type import LLMType
+    from nikhil.vak.domain.llm_factory.settings.llm_settings import LLMSettings
+    from nikhil.vak.domain.llm_factory.service.llm_builder import LLMBuilder
+    from nikhil.vak.domain.llm_factory.domain.llm_type import LLMType
     HAS_TULA = True
 except ImportError:
     HAS_TULA = False
@@ -146,7 +146,7 @@ def find_llm_config() -> Optional[Path]:
 
 
 def load_llm_via_factory(llm_config_path: Path) -> Optional[Any]:
-    """Load LLM using Tula's llm_factory"""
+    """Load LLM using Vak's llm_factory"""
     if not HAS_TULA:
         print_error("Tula modules not importable. Make sure you're in the project root.")
         return None
